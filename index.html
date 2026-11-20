@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INDUSTRIAL VISUALIZER // UNIT-04</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23ffaa00'/></svg>" />
+  <link rel="stylesheet" href="./src/ui/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body class="crt-screen">
+  <!-- 3D Scene Container -->
+  <div id="canvas-container"></div>
+
+  <!-- CRT Scanline & Grain Overlay -->
+  <div class="crt-overlay"></div>
+  <div class="vignette-overlay"></div>
+
+  <!-- Drop Flash Warning Strobe Overlay -->
+  <div id="screen-strobe" class="screen-strobe"></div>
+
+  <!-- UI HUD Layer -->
+  <div id="hud" class="hud-container">
+    <!-- Top System Bar -->
+    <header class="hud-header">
+      <div class="hud-group facility-info">
+        <span class="hud-tag caution-badge">CAUTION // 480V HIGH IMPACT</span>
+        <h1 class="hud-title">FORGE-04 <span class="dim">// HEAVY FABRICATION BAY</span></h1>
+        <div class="hud-meta">
+          <span class="status-indicator live-pulse"></span>
+          <span id="system-status">FACILITY ONLINE</span>
+          <span class="separator">|</span>
+          <span id="system-time">00:00:00.00</span>
+        </div>
+      </div>
+
+      <div class="hud-group kick-monitor">
+        <div id="kick-flash-box" class="kick-box">
+          <span class="kick-label">PUNCH IMPACT</span>
+          <div class="kick-indicator" id="kick-led"></div>
+          <span class="kick-energy-val" id="kick-energy-text">0.00 G</span>
+        </div>
+        <div id="drop-alert-banner" class="drop-banner">
+          <span class="hazard-stripe"></span>
+          <span class="drop-text">DROP SEQUENCE ACTIVE</span>
+          <span class="hazard-stripe"></span>
+        </div>
+      </div>
+
+      <div class="hud-group camera-controls">
+        <span class="hud-sublabel">CAM DIRECT</span>
+        <div class="btn-group">
+          <button id="btn-cam-orbit" class="hud-btn active" title="Flyby Crane / Cinematic Orbit">CRANE</button>
+          <button id="btn-cam-focus" class="hud-btn" title="Focus Active Machine">BAY FOCUS</button>
+          <button id="btn-cam-shake" class="hud-btn active" title="Toggle Kick Shockwave Screen Shake">SHAKE [ON]</button>
+          <button id="btn-toggle-crt" class="hud-btn" title="Toggle CRT Scanline Aesthetics">CRT [ON]</button>
+          <button id="btn-open-calibrate" class="hud-btn calibrate-btn" title="Open Calibration & Kick Sync Matrix">⚙ CALIBRATE</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Bottom Operator Deck -->
+    <footer class="hud-footer">
+      <!-- Deck Left: Audio Controls -->
+      <section class="hud-card audio-deck" id="card-audio-deck">
+        <div class="card-header">
+          <span class="card-id">CH-01</span>
+          <span class="card-title">ACOUSTIC INTAKE // DRIVE</span>
+          <div class="card-header-right">
+            <span id="track-duration" class="time-display">00:00 / 00:00</span>
+            <button class="card-min-btn" data-target="card-audio-deck" title="Minimize / Expand">_</button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="track-info-banner">
+            <span class="label">TRACK:</span>
+            <span id="track-title" class="track-name marquee">DETONATED (320kbps)</span>
+            <span id="audio-dsp-pill" class="dsp-badge analyzing">DSP: ANALYZING...</span>
+          </div>
+
+          <!-- Progress Scrubber with Calibrated Kick Zone Overlay -->
+          <div class="scrubber-bar" id="scrubber-track">
+            <div id="scrubber-zones-layer" class="scrubber-zones-layer"></div>
+            <div class="scrubber-fill" id="scrubber-fill"></div>
+          </div>
+
+          <div class="audio-controls-row">
+            <button id="btn-play-pause" class="hud-btn industrial-btn play-btn">▶ PLAY</button>
+            <label class="hud-btn industrial-btn load-btn" for="audio-file-input">
+              LOAD AUDIO
+              <input type="file" id="audio-file-input" accept="audio/*" style="display:none;" />
+            </label>
+          </div>
+
+          <!-- Sliders -->
+          <div class="sliders-row">
+            <div class="slider-control">
+              <label for="volume-slider">GAIN</label>
+              <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.85" />
+              <span id="volume-readout" class="readout">85%</span>
+            </div>
+            <div class="slider-control">
+              <label for="sensitivity-slider">KICK SENS</label>
+              <input type="range" id="sensitivity-slider" min="0.4" max="2.5" step="0.05" value="1.0" />
+              <span id="sens-readout" class="readout">1.0x</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Deck Center: Compact Realtime Telemetry & Spectrum -->
+      <section class="hud-card telemetry-deck" id="card-telemetry-deck">
+        <div class="card-header">
+          <span class="card-id">SC-02</span>
+          <span class="card-title">SPECTRUM</span>
+          <div class="card-header-right">
+            <span class="card-status live-text">REALTIME</span>
+            <button class="card-min-btn" data-target="card-telemetry-deck" title="Minimize / Expand">_</button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="telemetry-body">
+            <!-- Mini CRT Scope Canvas -->
+            <div class="scope-container">
+              <canvas id="scope-canvas" width="170" height="52"></canvas>
+              <div class="scope-grid"></div>
+            </div>
+
+            <!-- VU Energy Meters -->
+            <div class="vu-meters">
+              <div class="vu-item">
+                <span class="vu-label">BASS</span>
+                <div class="vu-track"><div id="vu-bass" class="vu-fill vu-bass"></div></div>
+              </div>
+              <div class="vu-item">
+                <span class="vu-label">MID</span>
+                <div class="vu-track"><div id="vu-mid" class="vu-fill vu-mid"></div></div>
+              </div>
+              <div class="vu-item">
+                <span class="vu-label">HIGH</span>
+                <div class="vu-track"><div id="vu-treble" class="vu-fill vu-treble"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Deck Right: Active Machine & Bay Matrix -->
+      <section class="hud-card machinery-deck" id="card-machinery-deck">
+        <div class="card-header">
+          <span class="card-id">BAY-03</span>
+          <span class="card-title">ACTIVE SECTOR SPOTLIGHT</span>
+          <div class="card-header-right">
+            <span id="director-mode" class="director-badge">AUTO-SEQUENCE</span>
+            <button class="card-min-btn" data-target="card-machinery-deck" title="Minimize / Expand">_</button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="active-machine-display">
+            <div class="machine-id-box">
+              <span class="unit-index" id="active-bay-index">BAY 01</span>
+            </div>
+            <div class="machine-details">
+              <div class="machine-name-huge" id="active-machine-name">HYDRAULIC STAMP PRESS</div>
+              <div class="machine-status" id="active-machine-status">CYCLE: SYNCHRONIZED [KICK DRIVE]</div>
+            </div>
+          </div>
+
+          <div class="bay-selector-grid">
+            <button class="bay-btn active" data-bay="0">01 PRESS</button>
+            <button class="bay-btn" data-bay="1">02 SHEAR</button>
+            <button class="bay-btn" data-bay="2">03 DRILL</button>
+            <button class="bay-btn" data-bay="3">04 FURNACE</button>
+            <button class="bay-btn" data-bay="4">05 ROLL DIE</button>
+            <button class="bay-btn auto-bay-btn selected" id="btn-auto-bay">AUTO</button>
+          </div>
+        </div>
+      </section>
+    </footer>
+  </div>
+
+  <!-- Audio Unlock Overlay for Browser Autoplay Policy -->
+  <div id="start-overlay" class="start-overlay">
+    <div class="start-modal">
+      <div class="modal-hazard-border"></div>
+      <div class="modal-header">
+        <span class="caution-badge">HIGH VOLTAGE SYSTEM</span>
+        <h2>FORGE INDUSTRIAL VISUALIZER</h2>
+        <p class="modal-subtitle">AUTOMATED CYBERNETIC HEAVY MACHINERY & AUDIO SPECTRAL SYNC</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="sys-item"><span>PRIMARY ACOUSTIC:</span> <strong>DETONATED (320kbps RAW TECHNO)</strong></div>
+        <div class="sys-item"><span>HARDWARE RIG:</span> <strong>5x SYNCHRONIZED PNEUMATIC & HYDRAULIC BAYS</strong></div>
+        <div class="sys-item"><span>ENGINE SPECS:</span> <strong>THREE.JS PBR + BLOOM POST-PROCESSING + AUDIO FFT</strong></div>
+      </div>
+
+      <button id="btn-start" class="btn-primary-engage">
+        <span class="btn-text">INITIALIZE TURBINES & LAUNCH</span>
+      </button>
+
+      <p class="drag-hint">DRAG & DROP ANY MP3 / WAV INTO THE WINDOW AT ANY TIME</p>
+    </div>
+  </div>
+
+  <!-- Calibration & Kick Sync Drawer Modal -->
+  <div id="calibration-drawer" class="calibration-drawer hidden">
+    <div class="calib-container">
+      <div class="calib-header">
+        <div class="calib-title-box">
+          <span class="caution-badge">PRECISION DSP TIMING MATRIX</span>
+          <h2>KICK SYNCHRONIZATION &amp; CALIBRATION</h2>
+        </div>
+        <div class="calib-header-right">
+          <span id="dsp-status-badge" class="dsp-badge analyzing">DSP: ANALYZING...</span>
+          <button id="btn-close-calibrate" class="hud-btn close-calib-btn">✕ CLOSE</button>
+        </div>
+      </div>
+
+      <div class="calib-body">
+        <!-- Section 0: Interactive Waveform & Kick-Map Selector -->
+        <div class="calib-section">
+          <div class="section-header-row">
+            <span class="calib-section-label">00 // WAVEFORM &amp; DSP KICK-MAP SELECTOR</span>
+            <div class="waveform-toolbar">
+              <div class="waveform-zoom-controls">
+                <button id="btn-wave-zoom-out" class="hud-btn micro-btn" title="Zoom Out">−</button>
+                <span id="wave-zoom-readout" class="readout zoom-readout">1.0x</span>
+                <button id="btn-wave-zoom-in" class="hud-btn micro-btn" title="Zoom In">+</button>
+                <button id="btn-wave-zoom-fit" class="hud-btn micro-btn" title="Reset Zoom (1x)">FIT</button>
+                <button id="btn-wave-zoom-follow" class="hud-btn micro-btn" title="Center View on Playhead">CENTER</button>
+              </div>
+              <div class="waveform-legend">
+                <span class="legend-item"><i class="dot dot-beat"></i> BEAT</span>
+                <span class="legend-item"><i class="dot dot-roll"></i> ROLL</span>
+                <span class="legend-item"><i class="dot dot-sub"></i> SUB</span>
+              </div>
+            </div>
+          </div>
+          <div class="waveform-selector-wrap">
+            <canvas id="calib-waveform-canvas" width="840" height="130"></canvas>
+            <div id="calib-wave-minimap" class="calib-wave-minimap" title="Drag viewport window to pan across track">
+              <div id="calib-wave-viewport" class="calib-wave-viewport"></div>
+            </div>
+          </div>
+          <span class="subtext">DRAG: CREATE KICK ZONE // CLICK: SEEK // SCROLL WHEEL: ZOOM // SHIFT+DRAG OR RIGHT-DRAG: PAN</span>
+        </div>
+
+        <!-- Section 1: Sync Mode & Presets -->
+        <div class="calib-section">
+          <span class="calib-section-label">01 // DETECTION &amp; ENFORCEMENT MODE</span>
+          <div class="mode-btn-group">
+            <button id="btn-mode-hybrid" class="mode-btn active" data-mode="hybrid">
+              <span class="mode-title">HYBRID SMART (RECOMMENDED)</span>
+              <span class="mode-desc">DSP-detected kicks with 100% priority &amp; machine lock inside Calibrated Drop Zones</span>
+            </button>
+            <button id="btn-mode-zones" class="mode-btn" data-mode="zones_only">
+              <span class="mode-title">ZONE ENFORCED (STRICT)</span>
+              <span class="mode-desc">Machines slam &amp; focus STRICTLY inside designated drop zones (zero triggers outside)</span>
+            </button>
+            <button id="btn-mode-auto" class="mode-btn" data-mode="auto">
+              <span class="mode-title">FULL DSP AUTO</span>
+              <span class="mode-desc">Triggers every DSP-classified kick &amp; kick roll across the entire track</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: BPM & Mechanical Latency Tuning -->
+        <div class="calib-section">
+          <span class="calib-section-label">02 // TEMPO GRID &amp; MECHANICAL LATENCY</span>
+          <div class="calib-grid-row">
+            <div class="calib-control-item">
+              <label for="calib-bpm-input">TRACK TEMPO (BPM)</label>
+              <div class="inline-control">
+                <input type="number" id="calib-bpm-input" name="calib-bpm-input" min="60" max="240" value="160.0" step="0.1" />
+                <button id="btn-auto-bpm" class="hud-btn micro-btn">AUTO DSP BPM</button>
+              </div>
+              <span id="calib-bpm-subtext" class="subtext">Beat Interval: 375.0ms</span>
+            </div>
+
+            <div class="calib-control-item">
+              <label for="calib-latency-slider">MECHANICAL IMPACT OFFSET (LATENCY)</label>
+              <div class="inline-control">
+                <input type="range" id="calib-latency-slider" name="calib-latency-slider" min="-150" max="150" value="0" step="5" />
+                <span id="calib-latency-readout" class="readout">0 ms</span>
+              </div>
+              <span class="subtext">+ms = advance visuals for Bluetooth/audio hardware delay</span>
+            </div>
+
+            <div class="calib-control-item">
+              <label for="calib-debounce-slider">DEBOUNCE &amp; KICK ROLLS</label>
+              <div class="inline-control">
+                <input type="range" id="calib-debounce-slider" name="calib-debounce-slider" min="50" max="420" value="85" step="5" />
+                <span id="calib-debounce-readout" class="readout">85 ms</span>
+                <button id="btn-toggle-rolls" class="hud-btn micro-btn active" title="Include 1/8th &amp; 1/16th rapid kick rolls">KICK ROLLS [ON]</button>
+              </div>
+              <span class="subtext">Low (85ms) preserves 1/16 rolls; High (&gt;260ms) locks 1/4 beat</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Calibrated Kick Zones -->
+        <div class="calib-section">
+          <div class="section-header-row">
+            <span class="calib-section-label">03 // ACTIVE KICK &amp; DROP ZONES (TIMELINE RANGES)</span>
+            <div class="zone-actions">
+              <button id="btn-add-current-zone" class="hud-btn micro-btn highlight-btn">+ MARK ZONE AT PLAYHEAD</button>
+              <button id="btn-reset-zones-preset" class="hud-btn micro-btn">RESET TO AUTO-DETECTED ZONES</button>
+            </div>
+          </div>
+
+          <div id="calib-zones-list" class="calib-zones-list">
+            <!-- Dynamic Zone items injected here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
