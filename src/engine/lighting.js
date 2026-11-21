@@ -234,6 +234,36 @@ export class IndustrialLighting {
     });
   }
 
+  setSkin(skin = 'default') {
+    const isReal = skin === 'realistic';
+    this.skin = isReal ? 'realistic' : 'default';
+
+    if (this.ambientLight) {
+      this.ambientLight.color.setHex(isReal ? 0x1b2028 : 0x404b5c);
+      this.ambientLight.intensity = isReal ? 0.42 : 1.4;
+    }
+    if (this.dirLight) {
+      this.dirLight.color.setHex(isReal ? 0xa8bdd4 : 0xd4e2f2);
+      this.dirLight.intensity = isReal ? 1.45 : 2.2;
+    }
+    if (this.fillLight) {
+      this.fillLight.color.setHex(isReal ? 0x26313d : 0x445566);
+      this.fillLight.intensity = isReal ? 0.45 : 1.1;
+    }
+
+    const spotBase = isReal ? 11.5 : 9.0;
+    for (let i = 0; i < this.baySpotlights.length; i++) {
+      this.baySpotlights[i].baseIntensity = spotBase;
+    }
+
+    const sodiumBase = isReal ? 2.2 : 4.2;
+    const sodiumColor = isReal ? 0xff8c24 : 0xffa834;
+    for (let s = 0; s < this.sodiumLamps.length; s++) {
+      this.sodiumLamps[s].baseIntensity = sodiumBase;
+      this.sodiumLamps[s].light.color.setHex(sodiumColor);
+    }
+  }
+
   setActiveMachine(index) {
     this.activeMachineIndex = Math.max(0, Math.min(this.bayPositions.length - 1, index));
   }

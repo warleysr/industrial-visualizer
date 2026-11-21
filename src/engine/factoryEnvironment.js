@@ -1160,6 +1160,98 @@ export class FactoryEnvironment {
     this.ambientSmoke = { points, geo, mat, tex, count, velocities };
   }
 
+  setSkin(skin = 'default') {
+    const isReal = skin === 'realistic';
+
+    const applyMat = (mat, props) => {
+      if (!mat) return;
+      if (props.color !== undefined) mat.color.setHex(props.color);
+      if (props.emissive !== undefined && mat.emissive) mat.emissive.setHex(props.emissive);
+      if (props.emissiveIntensity !== undefined) mat.emissiveIntensity = props.emissiveIntensity;
+      if (props.roughness !== undefined) mat.roughness = props.roughness;
+      if (props.metalness !== undefined) mat.metalness = props.metalness;
+      mat.needsUpdate = true;
+    };
+
+    applyMat(this.concreteMat, isReal
+      ? { color: 0x6c727a, roughness: 0.94, metalness: 0.08 }
+      : { color: 0xcccccc, roughness: 0.85, metalness: 0.12 });
+
+    applyMat(this.steelStructureMat, isReal
+      ? { color: 0x22262c, roughness: 0.78, metalness: 0.82 }
+      : { color: 0x3d434d, roughness: 0.68, metalness: 0.75 });
+
+    applyMat(this.darkIronMat, isReal
+      ? { color: 0x13161a, roughness: 0.82, metalness: 0.72 }
+      : { color: 0x22262d, roughness: 0.72, metalness: 0.65 });
+
+    applyMat(this.safetyYellowMat, isReal
+      ? { color: 0x7d5d14, roughness: 0.68, metalness: 0.30 }
+      : { color: 0xdca010, roughness: 0.45, metalness: 0.35 });
+
+    applyMat(this.hazardMat, isReal
+      ? { color: 0x7a766e, roughness: 0.78, metalness: 0.18 }
+      : { color: 0xffffff, roughness: 0.6, metalness: 0.2 });
+
+    applyMat(this.grateMat, isReal
+      ? { color: 0x6a7078, roughness: 0.7, metalness: 0.85 }
+      : { color: 0xffffff, roughness: 0.55, metalness: 0.85 });
+
+    applyMat(this.galvanizedMat, isReal
+      ? { color: 0x2a2f36, roughness: 0.65, metalness: 0.82 }
+      : { color: 0x4a515c, roughness: 0.52, metalness: 0.78 });
+
+    applyMat(this.wallMat, isReal
+      ? { color: 0x0d0f13, roughness: 0.95, metalness: 0.2 }
+      : { color: 0x181b20, roughness: 0.92, metalness: 0.25 });
+
+    applyMat(this.pipeRedMat, isReal
+      ? { color: 0x4d1818, roughness: 0.65, metalness: 0.45 }
+      : { color: 0x8a1e1e, roughness: 0.45, metalness: 0.5 });
+
+    applyMat(this.pipeYellowMat, isReal
+      ? { color: 0x6b5116, roughness: 0.65, metalness: 0.4 }
+      : { color: 0xc49012, roughness: 0.45, metalness: 0.45 });
+
+    applyMat(this.pipeBlueMat, isReal
+      ? { color: 0x162b40, roughness: 0.65, metalness: 0.45 }
+      : { color: 0x1f466b, roughness: 0.45, metalness: 0.5 });
+
+    applyMat(this.woodCrateMat, isReal
+      ? { color: 0x473624, roughness: 0.95 }
+      : { color: 0x7c5a36, roughness: 0.9 });
+
+    applyMat(this.woodPalletMat, isReal
+      ? { color: 0x332619, roughness: 0.96 }
+      : { color: 0x5d4328, roughness: 0.92 });
+
+    applyMat(this.drumBlueMat, isReal
+      ? { color: 0x162a40, roughness: 0.65, metalness: 0.6 }
+      : { color: 0x1e4a7a, roughness: 0.48, metalness: 0.65 });
+
+    applyMat(this.drumOrangeMat, isReal
+      ? { color: 0x6e3315, roughness: 0.68, metalness: 0.5 }
+      : { color: 0xc95414, roughness: 0.5, metalness: 0.55 });
+
+    applyMat(this.coverallMat, isReal
+      ? { color: 0x161a20, roughness: 0.9 }
+      : { color: 0x242c38, roughness: 0.85 });
+
+    applyMat(this.hiVisMat, isReal
+      ? { color: 0x994208, emissive: 0x1a0800, emissiveIntensity: 0.15, roughness: 0.7 }
+      : { color: 0xff6a00, emissive: 0x552200, emissiveIntensity: 0.45, roughness: 0.45 });
+
+    applyMat(this.hardHatMat, isReal
+      ? { color: 0x9e7a14, roughness: 0.48 }
+      : { color: 0xffc400, roughness: 0.3 });
+
+    if (this.ambientSmoke && this.ambientSmoke.mat) {
+      this.ambientSmoke.mat.color.setHex(isReal ? 0x6b7480 : 0xbcc6d4);
+      this.ambientSmoke.mat.opacity = isReal ? 0.24 : 0.32;
+      this.ambientSmoke.mat.needsUpdate = true;
+    }
+  }
+
   getBayPosition(index) {
     if (index >= 0 && index < this.bayPositions.length) {
       return this.bayPositions[index].clone();

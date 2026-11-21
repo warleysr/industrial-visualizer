@@ -24,6 +24,7 @@ export class HUD {
     this.btnCamFocus = document.getElementById('btn-cam-focus');
     this.btnCamShake = document.getElementById('btn-cam-shake');
     this.btnToggleCrt = document.getElementById('btn-toggle-crt');
+    this.btnToggleSkin = document.getElementById('btn-toggle-skin');
     this.crtOverlay = document.querySelector('.crt-overlay');
 
     // Calibration elements
@@ -85,7 +86,8 @@ export class HUD {
 
     // State
     this.isScreenShakeEnabled = true;
-    this.isCrtEnabled = true;
+    this.isCrtEnabled = false;
+    this.factorySkin = 'default';
     this.isKickRollsEnabled = true;
     this.cameraMode = 'orbit'; // 'orbit' or 'focus'
     this.manualBaySelection = null; // null = auto
@@ -116,6 +118,7 @@ export class HUD {
       onShakeToggle: () => {},
       onBaySelect: () => {},
       onStart: () => {},
+      onSkinChange: () => {},
       onSyncModeChange: () => {},
       onBpmChange: () => {},
       onReanalyzeBpm: () => {},
@@ -258,6 +261,11 @@ export class HUD {
     }
 
     if (this.btnToggleCrt) {
+      this.btnToggleCrt.classList.toggle('active', this.isCrtEnabled);
+      this.btnToggleCrt.textContent = `CRT [${this.isCrtEnabled ? 'ON' : 'OFF'}]`;
+      if (this.crtOverlay) {
+        this.crtOverlay.style.opacity = this.isCrtEnabled ? '0.85' : '0.0';
+      }
       this.btnToggleCrt.addEventListener('click', () => {
         this.isCrtEnabled = !this.isCrtEnabled;
         this.btnToggleCrt.classList.toggle('active', this.isCrtEnabled);
@@ -265,6 +273,16 @@ export class HUD {
         if (this.crtOverlay) {
           this.crtOverlay.style.opacity = this.isCrtEnabled ? '0.85' : '0.0';
         }
+      });
+    }
+
+    if (this.btnToggleSkin) {
+      this.btnToggleSkin.addEventListener('click', () => {
+        this.factorySkin = this.factorySkin === 'default' ? 'realistic' : 'default';
+        const isReal = this.factorySkin === 'realistic';
+        this.btnToggleSkin.classList.toggle('active', isReal);
+        this.btnToggleSkin.textContent = `SKIN [${isReal ? 'DARK REAL' : 'DEFAULT'}]`;
+        this.callbacks.onSkinChange(this.factorySkin);
       });
     }
 

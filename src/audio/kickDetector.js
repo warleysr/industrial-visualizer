@@ -329,6 +329,17 @@ export class KickDetector {
       return this._getState();
     }
 
+    // While DSP worker is actively analyzing (or idle before load), suppress real-time fallback triggers
+    // to prevent false hits before the precision beat-locked schedule is ready.
+    if (this.analysisStatus === 'analyzing' || this.analysisStatus === 'idle') {
+      this.isKick = false;
+      this.kickIntensity *= 0.82;
+      this.isDrop = inZone;
+      this.dropIntensity = inZone ? 1.0 : 0.0;
+      this.prevEffectiveTime = effectiveTime;
+      return this._getState();
+    }
+
     // ------------------------------------------------------------------
     // BRANCH B: Real-Time Spectral Flux Fallback Mode (strict flux peak)
     // ------------------------------------------------------------------

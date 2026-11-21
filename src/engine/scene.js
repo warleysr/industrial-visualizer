@@ -3,6 +3,7 @@ import { FactoryEnvironment } from './factoryEnvironment.js';
 import { IndustrialLighting } from './lighting.js';
 import { CameraDirector } from './cameraDirector.js';
 import { PostProcessingManager } from './postprocessing.js';
+import { setMaterialsSkin } from '../machines/materials.js';
 
 /**
  * SceneEngine
@@ -230,6 +231,33 @@ export class SceneEngine {
     if (this.lighting) {
       this.lighting.setActiveMachine(machineIndex);
     }
+  }
+
+  /**
+   * Switches factory visual skin ('default' | 'realistic')
+   * @param {string} skin
+   */
+  setSkin(skin = 'default') {
+    const isReal = skin === 'realistic';
+    const targetSkin = isReal ? 'realistic' : 'default';
+
+    if (this.scene) {
+      this.scene.background = new THREE.Color(isReal ? 0x050608 : 0x0e1117);
+      this.scene.fog = new THREE.FogExp2(isReal ? 0x07090c : 0x121620, isReal ? 0.011 : 0.006);
+    }
+    if (this.renderer) {
+      this.renderer.toneMappingExposure = isReal ? 1.05 : 1.25;
+    }
+    if (this.factory && typeof this.factory.setSkin === 'function') {
+      this.factory.setSkin(targetSkin);
+    }
+    if (this.lighting && typeof this.lighting.setSkin === 'function') {
+      this.lighting.setSkin(targetSkin);
+    }
+    if (this.postprocessing && typeof this.postprocessing.setSkin === 'function') {
+      this.postprocessing.setSkin(targetSkin);
+    }
+    setMaterialsSkin(targetSkin);
   }
 
   /**

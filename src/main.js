@@ -160,6 +160,13 @@ class App {
         console.log('[App] Screen shake toggled:', enabled);
       },
 
+      onSkinChange: (skin) => {
+        if (typeof this.sceneEngine.setSkin === 'function') {
+          this.sceneEngine.setSkin(skin);
+        }
+        console.log('[App] Factory skin changed:', skin);
+      },
+
       onBaySelect: (bayIndex) => {
         if (bayIndex !== null) {
           // Manual bay lock

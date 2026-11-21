@@ -147,6 +147,10 @@ export class PostProcessingManager {
     }
   }
 
+  setSkin(skin = 'default') {
+    this.skin = skin === 'realistic' ? 'realistic' : 'default';
+  }
+
   render(time, deltaTime, audioState) {
     if (!this.enabled || !this.composer) {
       this.renderer.render(this.scene, this.camera);
@@ -156,11 +160,13 @@ export class PostProcessingManager {
     const isKick = audioState?.kick || false;
     const kickIntensity = audioState?.kickIntensity || 1.0;
     const isDrop = audioState?.isDrop || false;
+    const isReal = this.skin === 'realistic';
 
     // Focused bloom boost on kicks and drops without washing out crisp metal edges
     if (this.bloomPass) {
-      const baseBloom = isDrop ? 0.58 : 0.42;
-      const targetBloom = isKick ? baseBloom + kickIntensity * 0.22 : baseBloom;
+      const baseBloom = isReal ? (isDrop ? 0.42 : 0.28) : (isDrop ? 0.58 : 0.42);
+      const kickBoost = isReal ? 0.16 : 0.22;
+      const targetBloom = isKick ? baseBloom + kickIntensity * kickBoost : baseBloom;
       this.bloomPass.strength = THREE.MathUtils.lerp(this.bloomPass.strength, targetBloom, deltaTime * 12.0);
     }
 

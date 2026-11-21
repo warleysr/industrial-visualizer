@@ -76,7 +76,7 @@ html, body {
     rgba(0, 0, 255, 0.015)
   );
   background-size: 100% 3px, 6px 100%;
-  opacity: 0.35;
+  opacity: 0;
   transition: opacity 0.3s ease;
 }
 
