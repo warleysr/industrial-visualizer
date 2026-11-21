@@ -242,11 +242,11 @@ export class SceneEngine {
     const targetSkin = isReal ? 'realistic' : 'default';
 
     if (this.scene) {
-      this.scene.background = new THREE.Color(isReal ? 0x050608 : 0x0e1117);
-      this.scene.fog = new THREE.FogExp2(isReal ? 0x07090c : 0x121620, isReal ? 0.011 : 0.006);
+      this.scene.background = new THREE.Color(isReal ? 0x090b0e : 0x0e1117);
+      this.scene.fog = new THREE.FogExp2(isReal ? 0x0c0e12 : 0x121620, isReal ? 0.0075 : 0.006);
     }
     if (this.renderer) {
-      this.renderer.toneMappingExposure = isReal ? 1.05 : 1.25;
+      this.renderer.toneMappingExposure = isReal ? 1.18 : 1.25;
     }
     if (this.factory && typeof this.factory.setSkin === 'function') {
       this.factory.setSkin(targetSkin);

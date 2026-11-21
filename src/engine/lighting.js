@@ -239,25 +239,25 @@ export class IndustrialLighting {
     this.skin = isReal ? 'realistic' : 'default';
 
     if (this.ambientLight) {
-      this.ambientLight.color.setHex(isReal ? 0x1b2028 : 0x404b5c);
-      this.ambientLight.intensity = isReal ? 0.42 : 1.4;
+      this.ambientLight.color.setHex(isReal ? 0x2d343e : 0x404b5c);
+      this.ambientLight.intensity = isReal ? 0.85 : 1.4;
     }
     if (this.dirLight) {
-      this.dirLight.color.setHex(isReal ? 0xa8bdd4 : 0xd4e2f2);
-      this.dirLight.intensity = isReal ? 1.45 : 2.2;
+      this.dirLight.color.setHex(isReal ? 0xc4d4e6 : 0xd4e2f2);
+      this.dirLight.intensity = isReal ? 1.9 : 2.2;
     }
     if (this.fillLight) {
-      this.fillLight.color.setHex(isReal ? 0x26313d : 0x445566);
-      this.fillLight.intensity = isReal ? 0.45 : 1.1;
+      this.fillLight.color.setHex(isReal ? 0x35424f : 0x445566);
+      this.fillLight.intensity = isReal ? 0.8 : 1.1;
     }
 
-    const spotBase = isReal ? 11.5 : 9.0;
+    const spotBase = isReal ? 10.5 : 9.0;
     for (let i = 0; i < this.baySpotlights.length; i++) {
       this.baySpotlights[i].baseIntensity = spotBase;
     }
 
-    const sodiumBase = isReal ? 2.2 : 4.2;
-    const sodiumColor = isReal ? 0xff8c24 : 0xffa834;
+    const sodiumBase = isReal ? 3.2 : 4.2;
+    const sodiumColor = isReal ? 0xff9838 : 0xffa834;
     for (let s = 0; s < this.sodiumLamps.length; s++) {
       this.sodiumLamps[s].baseIntensity = sodiumBase;
       this.sodiumLamps[s].light.color.setHex(sodiumColor);
